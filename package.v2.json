@@ -438,15 +438,27 @@
         }
     },
 	"ClashRuleProvider": {
-        "name": "Clash Rule Provider",
-        "description": "随时为Clash添加一些额外的规则。",
-        "labels": "工具",
-        "version": "0.1.0",
-        "icon": "Mihomo_Meta_A.png",
-        "author": "wumode",
-        "level": 1,
-        "history": {
-            "v0.1.0": "新增ClashRuleProvider"
-        }
-    }
+	    "name": "Clash Rule Provider",
+	    "description": "随时为Clash添加一些额外的规则。",
+	    "labels": "工具",
+	    "version": "0.1.0",
+	    "icon": "Mihomo_Meta_A.png",
+	    "author": "wumode",
+	    "level": 1,
+	    "history": {
+	        "v0.1.0": "新增ClashRuleProvider"
+	    }
+	},
+	"ProwlarrIndexer": {
+	    "name": "Prowlarr索引器",
+	    "description": "从Prowlarr获取索引站点配置并添加到MoviePilot",
+	    "labels": "站点,索引器",
+	    "version": "1.0",
+	    "icon": "Prowlarr.png",
+	    "author": "alex007",
+	    "level": 2,
+	    "history": {
+	           "v1.0": "初始版本"
+	       }
+	}
 }
