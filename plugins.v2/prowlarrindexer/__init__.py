@@ -5,7 +5,7 @@ from pathlib import Path
 
 from app.log import logger
 from app.plugins import _PluginBase
-from app.schemas.types import EventType, ChainEventType
+from app.schemas.types import EventType, ChainEventType, MediaType
 from app.core.event import eventmanager, Event
 from app.schemas import NotificationType
 from app.schemas.context import ResourceSelectionEventData, ResourceDownloadEventData
@@ -64,14 +64,16 @@ class ProwlarrIndexer(_PluginBase):
                     headers = {"X-Api-Key": self._prowlarr_api_key}
                     
                     logger.debug(f"向Prowlarr发送搜索请求: {url} {params}")
+                    logger.debug(f"请求头: {headers}")
                     response = requests.get(url, params=params, headers=headers, timeout=30)
                     
                     if response.status_code == 200:
                         results = response.json()
                         logger.debug(f"从Prowlarr获取到 {len(results)} 条搜索结果")
+                        logger.debug(f"示例搜索结果: {json.dumps(results[:1], indent=2) if results else '无结果'}")
                         search_results.extend(results)
                     else:
-                        logger.error(f"Prowlarr搜索失败，状态码: {response.status_code}")
+                        logger.error(f"Prowlarr搜索失败，状态码: {response.status_code}, 响应: {response.text}")
                 except Exception as e:
                     logger.error(f"Prowlarr搜索异常: {str(e)}")
             
@@ -103,6 +105,7 @@ class ProwlarrIndexer(_PluginBase):
                 headers = {"X-Api-Key": self._prowlarr_api_key}
                 
                 logger.debug(f"向Prowlarr发送下载请求: {download_url} {params}")
+                logger.debug(f"请求头: {headers}")
                 response = requests.get(download_url, params=params, headers=headers, timeout=30)
                 
                 if response.status_code == 200:
@@ -110,8 +113,9 @@ class ProwlarrIndexer(_PluginBase):
                     event_data.content = response.content
                     event_data.content_type = "application/x-bittorrent"
                     logger.info(f"成功从Prowlarr下载资源: {event_data.context.title}")
+                    logger.debug(f"下载响应头: {response.headers}")
                 else:
-                    logger.error(f"Prowlarr下载失败，状态码: {response.status_code}")
+                    logger.error(f"Prowlarr下载失败，状态码: {response.status_code}, 响应: {response.text}")
                     self.post_message(
                         mtype=NotificationType.Error,
                         title="下载失败",
