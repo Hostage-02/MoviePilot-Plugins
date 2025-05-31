@@ -17,7 +17,7 @@ class ProwlarrIndexer(_PluginBase):
     plugin_name = "Prowlarr索引器"
     plugin_desc = "从Prowlarr获取索引站点配置并添加到MoviePilot"
     plugin_icon = "Prowlarr.png"
-    plugin_version = "1.0"
+    plugin_version = "1.0.1"
     plugin_author = "alex007"
     plugin_config_prefix = "prowlarrindexer_"
     plugin_order = 30
@@ -37,7 +37,6 @@ class ProwlarrIndexer(_PluginBase):
             self._prowlarr_url = config.get("prowlarr_url", "").strip("/")
             self._prowlarr_api_key = config.get("prowlarr_api_key", "")
             self._sync_interval = int(config.get("sync_interval", 24))
-            self._default_cookie = config.get("default_cookie", "")
             
             if self._enabled and self._prowlarr_url and self._prowlarr_api_key:
                 self.sync_prowlarr_indexers()
@@ -46,9 +45,13 @@ class ProwlarrIndexer(_PluginBase):
         """
         将Prowlarr索引器转换为MoviePilot格式
         """
+        logger.debug(f"开始转换Prowlarr索引器: {prowlarr_indexer.get('name')}")
+        logger.debug(f"原始Prowlarr数据: {json.dumps(prowlarr_indexer, ensure_ascii=False, indent=2)}")
+        
         # 获取基础信息
         domain = next((url for url in prowlarr_indexer.get("indexerUrls", []) if url), "")
         if not domain:
+            logger.warning(f"索引器 {prowlarr_indexer.get('name')} 没有有效的域名，跳过")
             return {}
             
         # 构建完整站点配置
@@ -57,7 +60,7 @@ class ProwlarrIndexer(_PluginBase):
             "name": prowlarr_indexer.get("name", ""),
             "domain": domain,
             "public": not prowlarr_indexer.get("privacy", "private") == "private",
-            "cookie": self._default_cookie,  # 使用配置的默认cookie
+            "cookie": "",  # 需要用户手动填写或通过cookiecloud同步
             "ua": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
             "proxy": False,
             "parser": "SiteSpider",  # 默认解析器
@@ -197,43 +200,6 @@ class ProwlarrIndexer(_PluginBase):
                             }
                         ]
                     },
-                    {
-                        'component': 'VRow',
-                        'content': [
-                            {
-                                'component': 'VCol',
-                                'props': {'cols': 12},
-                                'content': [
-                                    {
-                                        'component': 'VTextField',
-                                        'props': {
-                                            'model': 'default_cookie',
-                                            'label': '默认Cookie',
-                                            'placeholder': '可为空，将应用于所有同步的站点'
-                                        }
-                                    }
-                                ]
-                            }
-                        ]
-                    },
-                    {
-                        'component': 'VRow',
-                        'content': [
-                            {
-                                'component': 'VCol',
-                                'props': {'cols': 12},
-                                'content': [
-                                    {
-                                        'component': 'VAlert',
-                                        'props': {
-                                            'type': 'info',
-                                            'text': '注意：部分私有站点需要正确设置Cookie才能使用，可在站点管理页面单独修改'
-                                        }
-                                    }
-                                ]
-                            }
-                        ]
-                    }
                 ]
             }
         ], {
@@ -241,7 +207,6 @@ class ProwlarrIndexer(_PluginBase):
             "prowlarr_url": "",
             "prowlarr_api_key": "",
             "sync_interval": 24,
-            "default_cookie": ""
         }
 
     def get_page(self) -> List[dict]:
@@ -356,9 +321,13 @@ class ProwlarrIndexer(_PluginBase):
                 logger.debug(f"添加索引器配置: {json_str}")
                 
                 try:
-                    self.siteshelper.add_indexer(domain, json.loads(json_str))
-                    success_count += 1
-                    logger.info(f"成功添加索引器: {moviepilot_indexer['name']}")
+                    result = self.siteshelper.add_indexer(domain, json.loads(json_str))
+                    if result:
+                        success_count += 1
+                        logger.info(f"成功添加索引器: {moviepilot_indexer['name']}")
+                        logger.debug(f"添加结果: {result}")
+                    else:
+                        logger.error(f"添加索引器 {moviepilot_indexer['name']} 返回失败")
                 except Exception as e:
                     logger.error(f"添加索引器失败: {str(e)}")
                     logger.debug(f"失败配置: {json_str}")
