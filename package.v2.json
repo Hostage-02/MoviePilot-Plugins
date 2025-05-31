@@ -453,7 +453,7 @@
 	    "name": "Prowlarr索引器",
 	    "description": "从Prowlarr获取索引站点配置并添加到MoviePilot",
 	    "labels": "站点,索引器",
-	    "version": "1.0",
+	    "version": "1.0.2",
 	    "icon": "Prowlarr.png",
 	    "author": "alex007",
 	    "level": 2,
