@@ -3,11 +3,12 @@
         "name": "Prowlarr索引器",
         "description": "使用Prowlarr扩展内建索引器支持的站点",
         "labels": "站点,索引器",
-        "version": "1.0",
+        "version": "1.1",
         "icon": "Ward_A.png",
         "author": "alex007",
         "level": 2,
         "history": {
+            "v1.1": "修复类型转换错误和定时任务参数问题",
             "v1.0": "初始版本，支持从Prowlarr获取索引器配置"
         }
     }
