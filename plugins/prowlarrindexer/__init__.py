@@ -27,7 +27,7 @@ class ProwlarrIndexer(_PluginBase):
     _enabled = False
     _prowlarr_url = ""
     _prowlarr_api_key = ""
-    _indexers = {}
+    _indexers = []  # 改为列表而不是字典
     _auto_update = False
     _update_interval = 12
     _last_update_time = 0
@@ -81,7 +81,7 @@ class ProwlarrIndexer(_PluginBase):
                 return
             
             # 清空旧的索引器缓存
-            self._indexers = {}
+            self._indexers = []
             
             # 处理每个索引器
             for indexer in indexers:
@@ -97,7 +97,7 @@ class ProwlarrIndexer(_PluginBase):
                     continue
                 
                 # 缓存索引器配置
-                self._indexers[indexer_id] = indexer_config
+                self._indexers.append(indexer_config)
                 
                 # 获取索引器域名
                 domain = self._get_indexer_domain(indexer)
@@ -165,10 +165,10 @@ class ProwlarrIndexer(_PluginBase):
                 "timeout": 30,
             }
             
-            # 添加搜索配置
+            # 添加搜索配置 - 修复这里的URL问题
             config["search"] = {
                 "paths": [{
-                    "path": f"{self._prowlarr_url}/api/v1/search",
+                    "path": "api/v1/search",  # 不包含Prowlarr URL
                     "method": "get"
                 }],
                 "params": {
@@ -479,6 +479,16 @@ class ProwlarrIndexer(_PluginBase):
         """
         拼装插件详情页面
         """
+        # 将索引器列表转换为可显示的格式
+        indexer_items = []
+        for indexer in self._indexers:
+            indexer_items.append({
+                "id": indexer.get("id", ""),
+                "name": indexer.get("name", ""),
+                "domain": indexer.get("domain", ""),
+                "public": "是" if indexer.get("public") else "否"
+            })
+            
         return [
             {
                 'component': 'VRow',
@@ -531,7 +541,7 @@ class ProwlarrIndexer(_PluginBase):
                                             'key': 'public'
                                         }
                                     ],
-                                    'items': self._indexers.values() if self._indexers else []
+                                    'items': indexer_items
                                 }
                             }
                         ]
@@ -554,6 +564,12 @@ class ProwlarrIndexer(_PluginBase):
                                     'text': '立即更新索引器',
                                     'variant': 'elevated',
                                     'onClick': 'update_indexers'
+                                },
+                                'events': {
+                                    'click': {
+                                        'api': 'plugin/ProwlarrIndexer/update_indexers',
+                                        'method': 'get'
+                                    }
                                 }
                             }
                         ]
