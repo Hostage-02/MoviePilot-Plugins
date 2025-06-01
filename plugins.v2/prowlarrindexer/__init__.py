@@ -157,7 +157,7 @@ class ProwlarrIndexer(_PluginBase):
             config = {
                 "id": f"prowlarr_{indexer_id}",
                 "name": indexer_name,
-                "domain": base_url,
+                "domain": self._prowlarr_url,  # 使用Prowlarr URL作为域名
                 "encoding": "UTF-8",
                 "public": not indexer.get("privacy", "private") == "private",
                 "proxy": self._proxy,
@@ -165,10 +165,10 @@ class ProwlarrIndexer(_PluginBase):
                 "timeout": 30,
             }
             
-            # 添加搜索配置 - 修复这里的URL问题
+            # 添加搜索配置 - 直接使用Prowlarr API
             config["search"] = {
                 "paths": [{
-                    "path": "api/v1/search",  # 不包含Prowlarr URL
+                    "path": "api/v1/search",
                     "method": "get"
                 }],
                 "params": {
@@ -583,3 +583,6 @@ class ProwlarrIndexer(_PluginBase):
         退出插件
         """
         pass
+
+
+
