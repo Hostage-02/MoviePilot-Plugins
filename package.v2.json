@@ -10,5 +10,17 @@
         "history": {
             "v1.0": "初始版本，支持将MoviePilot搜索请求转发到Prowlarr"
         }
+    },
+    "ProwlarrIndexer": {
+        "name": "Prowlarr索引器",
+        "description": "将Prowlarr中的索引器动态注册到MoviePilot",
+        "labels": "站点,索引器",
+        "version": "1.0",
+        "icon": "Prowlarr.png",
+        "author": "MoviePilot",
+        "level": 2,
+        "history": {
+            "v1.0": "初始版本，支持动态注册Prowlarr索引器"
+        }
     }
 }
